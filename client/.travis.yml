@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t lizmoscre/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run lizmoscre/react-test npm test -- --converage
+
+after_success:
+  - docker build -t lizmoscre/multi-client ./client
+  - docker build -t lizmoscre/multi-nginx ./nginx
+  - docker build -t lizmoscre/multi-server ./server
+  - docker build -t lizmoscre/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push lizmoscre/multi-client
+  - docker push lizmoscre/multi-nginx
+  - docker push lizmoscre/multi-server
+  - docker push lizmoscre/multi-worker
